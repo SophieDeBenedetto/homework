@@ -52,7 +52,7 @@
         <script>
                 var DATA={familyMembers:[]};
                 var memberId=1
-                var getRelOptions= function(){
+                function getRelOptions(){
                     var options=[];
                     var element_array=document.getElementsByName("rel")[0].options
                     for(var i=0; i<element_array.length; i++){
@@ -62,26 +62,26 @@
                     };
                     return options
                 }
-                var validateData= function(age, rel){
-                    if (isNaN(age)|| age<0){
-                        alert("Age must be a number greater than 0")
-                        return false
+
+                function formValidationFailure(msg){
+                    alert(msg)
+                }
+
+
+                function validateData(age, rel, smoke, success, failure){
+                    if (isNaN(age)|| age<0 || age===""){
+                        failure("Age must be a number greater than 0")
+                    } 
+                    else if(getRelOptions().indexOf(rel)<0){
+                        failure("You must select a valid family relationship")    
                     }
-                    if(getRelOptions().indexOf(rel)<0){
-                        alert("You must select a valid family relationship")
-                        return false
-                    }
-                    return true
-                    }
-                var addPerson=function(event){
-                    event.preventDefault();
-                    var age=document.getElementsByName("age")[0].value;
-                    var rel=document.getElementsByName("rel")[0].value;
-                    var smoke= document.getElementsByName("smoker")[0].checked ? "Yes" : "No"
-                     if (!validateData(age,rel)){
-                        return 
-                     }
-                     if (!document.getElementById("review_list")){
+                    else success(age, rel, smoke)
+
+                }
+
+                function addValidatedPerson(age, rel, smoke){
+
+                    if (!document.getElementById("review_list")){
                     var list = document.createElement("ol");
                     list.setAttribute("id","review_list");
                     }
@@ -91,20 +91,21 @@
                     newHTML="<strong>Family Member Relationship:  </strong>" + String(rel) + "<br><strong> Age:  </strong>" + String(age) + "<br><strong> Smoker:  </strong>" + String(smoke) +"<br>";
                     listElement.innerHTML=newHTML;
                     DATA.familyMembers.push({id:memberId, rel:rel, age:age, smoker:(smoke==="Yes"? true :false )})  
-                    memberId++;
                     var deleteButton=document.createElement("button");
                     deleteButton.innerHTML="remove family member";
                     deleteButton.setAttribute("memberid",memberId)
+                    memberId++;
                     deleteButton.addEventListener("click", function(){
-                        list.removeChild(listElement);
                         var indexToRemove;
                          for(var i=0; i<DATA.familyMembers.length; i++){
                              if (String(DATA.familyMembers[i].id)===deleteButton.getAttribute("memberid")){ 
                                 indexToRemove=i;
+                                DATA.familyMembers.splice(indexToRemove,1)
                                 break;
                             }
-                            DATA.familyMembers.splice(indexToRemove,1)
+
                          }
+                         list.removeChild(listElement);
                     });
                     listElement.appendChild(deleteButton);
                     list.appendChild(document.createElement("br"));
@@ -112,6 +113,15 @@
                     list.appendChild(listElement);
                     document.body.appendChild(list);
                     document.getElementsByTagName("form")[0].reset();
+
+                }
+
+                var addPerson=function(event){
+                    event.preventDefault();
+                    var age=document.getElementsByName("age")[0].value;
+                    var rel=document.getElementsByName("rel")[0].value;
+                    var smoke= document.getElementsByName("smoker")[0].checked ? "Yes" : "No"
+                    validateData(age, rel, smoke, addValidatedPerson,formValidationFailure)    
                 };
 
 
@@ -124,11 +134,7 @@
                     };
                      for(var i=0; i<list.length; i++){
                         // validate again in case the global variable was tampered with
-                        if (validateData(list[i].age, list[i].rel)){
-                         debugger
-                         delete list[i].id
-                        }
-                        else return;   
+                        validateData(list[i].age, list[i].rel, list[i].smoke, function(age, rel, smoke){delete list[i].id},formValidationFailure) 
                     };
                     var json = JSON.stringify(DATA);
                     var debug=document.getElementsByClassName("debug")[0];
@@ -136,6 +142,7 @@
                     debug.appendChild(result);
                     alert("Your form has been submitted, thank you for your submission")
                     }; 
+                
                 var addButton=document.getElementsByClassName("add")[0];
                 addButton.addEventListener("click", addPerson)
 
