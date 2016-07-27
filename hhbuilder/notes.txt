@@ -1,0 +1,12 @@
+Notes:
+
+1. Following the instructions, the html was not modified to load any other files and the full script was included in the script tags provided.
+
+2. Data gets validated when the "add" button is clicked, prior to adding the data to the html list AND when the "submit" button is clicked. The second validation is for added security in case someone tampered with the global variable.
+
+3. The smoker status is displayed as "Yes"/"No" in the html but in the serialization it is kept as a boolean true/false.  This was done because "Yes"/"No" is more semantic for a user.
+
+4. preventDefaul() is called for the submit (serialize) function. If there was a real submission, this would not be the case, and the page would be allowed to refresh after submitting. This was only done so that the serialized JSON is not lost upon refresh and remains in the <pre> tag
+
+
+

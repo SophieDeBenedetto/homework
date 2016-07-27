@@ -50,7 +50,99 @@
         </div>
         <pre class="debug"></pre>
         <script>
-            // your code goes here ...
+                var DATA={familyMembers:[]};
+                var memberId=1
+                var getRelOptions= function(){
+                    var options=[];
+                    var element_array=document.getElementsByName("rel")[0].options
+                    for(var i=0; i<element_array.length; i++){
+                        if (element_array[i].value!==""){
+                        options.push(element_array[i].value)
+                        };
+                    };
+                    return options
+                }
+                var validateData= function(age, rel){
+                    if (isNaN(age)|| age<0){
+                        alert("Age must be a number greater than 0")
+                        return false
+                    }
+                    if(getRelOptions().indexOf(rel)<0){
+                        alert("You must select a valid family relationship")
+                        return false
+                    }
+                    return true
+                    }
+                var addPerson=function(event){
+                    event.preventDefault();
+                    var age=document.getElementsByName("age")[0].value;
+                    var rel=document.getElementsByName("rel")[0].value;
+                    var smoke= document.getElementsByName("smoker")[0].checked ? "Yes" : "No"
+                     if (!validateData(age,rel)){
+                        return 
+                     }
+                     if (!document.getElementById("review_list")){
+                    var list = document.createElement("ol");
+                    list.setAttribute("id","review_list");
+                    }
+                    else { var list= document.getElementById("review_list")
+                    }
+                    var listElement= document.createElement("li");
+                    newHTML="<strong>Family Member Relationship:  </strong>" + String(rel) + "<br><strong> Age:  </strong>" + String(age) + "<br><strong> Smoker:  </strong>" + String(smoke) +"<br>";
+                    listElement.innerHTML=newHTML;
+                    DATA.familyMembers.push({id:memberId, rel:rel, age:age, smoker:(smoke==="Yes"? true :false )})  
+                    memberId++;
+                    var deleteButton=document.createElement("button");
+                    deleteButton.innerHTML="remove family member";
+                    deleteButton.setAttribute("memberid",memberId)
+                    deleteButton.addEventListener("click", function(){
+                        list.removeChild(listElement);
+                        var indexToRemove;
+                         for(var i=0; i<DATA.familyMembers.length; i++){
+                             if (String(DATA.familyMembers[i].id)===deleteButton.getAttribute("memberid")){ 
+                                indexToRemove=i;
+                                break;
+                            }
+                            DATA.familyMembers.splice(indexToRemove,1)
+                         }
+                    });
+                    listElement.appendChild(deleteButton);
+                    list.appendChild(document.createElement("br"));
+
+                    list.appendChild(listElement);
+                    document.body.appendChild(list);
+                    document.getElementsByTagName("form")[0].reset();
+                };
+
+
+                var serialize= function(event){
+                    event.preventDefault() // this would not be implemented in a real situation here
+                     var list=DATA.familyMembers
+                    if(list.length<1){
+                        alert("You must add at least one family member before submitting")
+                        return
+                    };
+                     for(var i=0; i<list.length; i++){
+                        // validate again in case the global variable was tampered with
+                        if (validateData(list[i].age, list[i].rel)){
+                         debugger
+                         delete list[i].id
+                        }
+                        else return;   
+                    };
+                    var json = JSON.stringify(DATA);
+                    var debug=document.getElementsByClassName("debug")[0];
+                    var result=document.createTextNode(json);
+                    debug.appendChild(result);
+                    alert("Your form has been submitted, thank you for your submission")
+                    }; 
+                var addButton=document.getElementsByClassName("add")[0];
+                addButton.addEventListener("click", addPerson)
+
+                var submitButton=document.querySelector('[type="submit"]');
+                submitButton.addEventListener("click",serialize);
+
+            
         </script>
     </body>
 </html>
