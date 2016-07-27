@@ -8,5 +8,7 @@ Notes:
 
 4. preventDefaul() is called for the submit (serialize) function. If there was a real submission, this would not be the case, and the page would be allowed to refresh after submitting. This was only done so that the serialized JSON is not lost upon refresh and remains in the <pre> tag
 
+5. After each addition of a person, the form is cleared for ease of use in entering the next
+
 
 
